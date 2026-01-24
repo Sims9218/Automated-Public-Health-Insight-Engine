@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from datetime import datetime
 
-API_KEY = os.getenv("f8a67246c69ba428919ace2c52c82cc7")
+API_KEY = os.getenv("be5254b458f665203429e6930a002a59")
 LAT, LON = 19.0330, 73.0297  # Navi Mumbai
 
 def run_pipeline():
