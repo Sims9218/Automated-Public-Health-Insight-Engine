@@ -9,25 +9,22 @@ LAT, LON = 19.0330, 73.0297  # Navi Mumbai
 
 def run_pipeline():
     url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={LAT}&lon={LON}&appid={API_KEY}"
+    response = requests.get(url)
+    res = response.json()
     
-    try:
-        response = requests.get(url)
-        res = response.json()
-        
-        # 1. Check HTTP Status Code
-        if response.status_code != 200:
-            error_msg = res.get('message', 'Unknown error')
-            print(f"❌ API Error {response.status_code}: {error_msg}")
-            return
+    # 1. Check if the API returned an error code
+    if response.status_code != 200:
+        print(f"❌ API Error: {res.get('message', 'Unknown error')}")
+        return
 
-        # 2. Validate Key Existence
-        if 'list' not in res:
-            print(f"❌ Critical Error: 'list' key missing. Full Response: {res}")
-            return
+    # 2. Check if 'list' exists before accessing it
+    if 'list' not in res:
+        print(f"❌ Data Error: 'list' key missing. Full response: {res}")
+        return
 
-        # 3. Proceed with Data Extraction
-        data = res['list'][0]['components']
-        aqi = res['list'][0]['main']['aqi']
+    # 3. Only now do we proceed with extraction
+    data = res['list'][0]['components']
+    aqi = res['list'][0]['main']['aqi']
         
         # Data Quality Check
         if data['pm2_5'] <= 0:
