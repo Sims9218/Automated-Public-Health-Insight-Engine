@@ -8,7 +8,7 @@ API_KEY = os.getenv("OPENWEATHER_API_KEY")
 LAT, LON = 19.0330, 73.0297  # Navi Mumbai
 
 def run_pipeline():
-    url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={LAT}&lon={LON}&appid={API_KEY}"
+    url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat=19.0330&lon=73.0297&appid=be5254b458f665203429e6930a002a59"
     
     try:
         response = requests.get(url)
