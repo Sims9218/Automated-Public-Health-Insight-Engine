@@ -3,8 +3,8 @@ import pandas as pd
 import plotly.express as px
 
 # Replace these with your actual GitHub username and repo name
-GITHUB_USER = "your-username"
-REPO_NAME = "your-repo-name"
+GITHUB_USER = "sims9218"
+REPO_NAME = "Automated-Public-Health-Insight-Engine"
 RAW_URL_BASE = f"https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/main"
 
 st.set_page_config(page_title="Health Risk Index Engine", layout="wide")
