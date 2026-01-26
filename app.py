@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # Replace these with your actual GitHub username and repo name
-GITHUB_USER = "sims9218"
+GITHUB_USER = "Sims9218"
 REPO_NAME = "Automated-Public-Health-Insight-Engine"
 RAW_URL_BASE = f"https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/main"
 
