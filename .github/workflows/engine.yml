@@ -2,7 +2,7 @@ name: Public Health Insight Engine
 
 on:
   schedule:
-    - cron: '25 * * * *' # Runs every hour
+    - cron: '25 * * * *' # Runs at 25th minute of every hour
   workflow_dispatch: # Allows manual trigger
 
 jobs:
