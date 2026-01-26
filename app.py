@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Replace these with your actual GitHub username and repo name
 GITHUB_USER = "Sims9218"
 REPO_NAME = "Automated-Public-Health-Insight-Engine"
 RAW_URL_BASE = f"https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/main"
@@ -23,7 +22,6 @@ try:
     history_df = load_github_data("pollution_history.csv")
     log_df = load_github_data("performance_log.csv")
 
-    # --- TOP METRICS ---
     latest_data = history_df.iloc[-1]
     col1, col2, col3, col4 = st.columns(4)
     
