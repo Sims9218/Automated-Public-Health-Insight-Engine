@@ -34,44 +34,71 @@ def retrain_model():
 
 # 3. Main Execution Loop
 def run_engine():
-    # A. Fetch Live Data
+    # --- A. DATA INGESTION ---
     api_key = os.getenv("API_KEY")
+    # Coordinates for your target location
     url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat=19.07&lon=72.87&appid={api_key}"
-    raw_data = requests.get(url).json()['list'][0]['components']
+    
+    try:
+        response = requests.get(url).json()
+        raw_data = response['list'][0]['components']
+    except Exception as e:
+        print(f"Error fetching API data: {e}")
+        return
+
     current_hri = calculate_hri(raw_data)
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
 
-    # B. Self-Correction Check (Compare past prediction with current reality)
+    # --- B. SELF-CORRECTION & PERFORMANCE LOGGING ---
+    # We look at the LAST prediction made to compare with TODAY'S actual HRI
     if os.path.exists(LOG_PATH):
         logs = pd.read_csv(LOG_PATH)
-        # Find if we had a prediction for 'now' made 24h ago
-        # (Simplified: comparing latest prediction to current actual)
-        last_pred = logs['predicted_hri'].iloc[-1]
-        error = abs(last_pred - current_hri)
-        
-        # Log the error for tracking
-        new_log = pd.DataFrame([[timestamp, last_pred, current_hri, error]], 
-                               columns=['timestamp', 'predicted_hri', 'actual_hri', 'error'])
-        new_log.to_csv(LOG_PATH, mode='a', header=False, index=False)
-        
-        if error > RETRAIN_THRESHOLD:
-            retrain_model()
+        if not logs.empty:
+            # Get the prediction from the previous run
+            last_pred = logs['predicted_hri'].iloc[-1]
+            error = abs(last_pred - current_hri)
+            
+            # Update the last row with the actual HRI and the calculated error
+            logs.loc[logs.index[-1], 'actual_hri'] = current_hri
+            logs.loc[logs.index[-1], 'error'] = error
+            logs.to_csv(LOG_PATH, index=False)
+            
+            # Trigger Retraining if error exceeds threshold
+            if error > RETRAIN_THRESHOLD:
+                print(f"Model drift detected (Error: {error}). Retraining...")
+                retrain_model()
+    else:
+        # Initialize the file if it doesn't exist
+        empty_logs = pd.DataFrame(columns=['timestamp', 'predicted_hri', 'actual_hri', 'error'])
+        empty_logs.to_csv(LOG_PATH, index=False)
+        print("Initialized performance_log.csv")
 
-    # C. Make New Prediction for Tomorrow
+    # --- C. ML PREDICTION FOR THE NEXT CYCLE ---
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
+        # Prepare features for XGBoost
         features = pd.DataFrame([raw_data])[['pm2_5', 'pm10', 'no2', 'o3', 'co']]
         prediction = model.predict(features)[0]
     else:
-        prediction = current_hri # Fallback if no model exists yet
-        retrain_model() # Initial training
+        # If no model exists, our 'prediction' is just a baseline 
+        prediction = current_hri 
+        retrain_model() # Initial training to create the .pkl file
 
-    # D. Save Current Actual Data for future training
+    # --- D. LOG THE NEW PREDICTION ---
+    # We log the prediction NOW so that the NEXT run can compare it to reality
+    new_row = pd.DataFrame([[timestamp, round(prediction, 2), None, None]], 
+                           columns=['timestamp', 'predicted_hri', 'actual_hri', 'error'])
+    new_row.to_csv(LOG_PATH, mode='a', header=not os.path.exists(LOG_PATH), index=False)
+
+    # --- E. ARCHIVE RAW DATA FOR TRAINING ---
     raw_data['hri_actual'] = current_hri
     raw_data['timestamp'] = timestamp
     pd.DataFrame([raw_data]).to_csv(DATA_PATH, mode='a', header=not os.path.exists(DATA_PATH), index=False)
 
-    print(f"Analysis Complete: Current HRI is {current_hri}. Forecasted HRI: {round(prediction, 2)}")
+    # --- F. NOTIFICATIONS ---
+    precaution = get_precautions(current_hri)
+    print(f"Done! Current HRI: {current_hri} | Forecasted: {round(prediction, 2)}")
+
 
 if __name__ == "__main__":
     run_engine()
