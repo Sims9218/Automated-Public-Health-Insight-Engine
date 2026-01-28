@@ -18,6 +18,16 @@ def calculate_hri(data):
     hri_score = sum((data.get(k, 0) / limits[k]) * weights[k] for k in weights)
     return round(hri_score * 100, 2)
 
+def get_precautions(hri):
+    if hri < 50:
+        return "Air quality is good. Safe for outdoor activities."
+    elif hri < 100:
+        return "Moderate risk. Sensitive groups should limit outdoor exertion."
+    elif hri < 150:
+        return "Unhealthy. Wear an N95 mask and avoid heavy outdoor exercise."
+    else:
+        return "Hazardous! Stay indoors and use air purifiers."
+
 # 2. Automated Retraining Logic
 def retrain_model():
     if not os.path.exists(DATA_PATH): return
