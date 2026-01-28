@@ -9,8 +9,8 @@ Key Features
 5. Health Notifications: Real-time alerts sent via Telegram when hazardous air quality is detected.
 
 Tech Stack
-.Language: Python 3.9+
-.ML Framework: XGBoost, Scikit-learn
-.Automation: GitHub Actions (Cron scheduling)
-.Visualization: Streamlit, Plotly
-.Data Handling: Pandas, Joblib
+Language: Python 3.9+
+ML Framework: XGBoost, Scikit-learn
+Automation: GitHub Actions (Cron scheduling)
+Visualization: Streamlit, Plotly
+Data Handling: Pandas, Joblib
